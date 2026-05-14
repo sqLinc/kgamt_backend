@@ -1,9 +1,7 @@
 FROM gradle:8.5-jdk21 AS build
 WORKDIR /app
-COPY src src
-COPY build.gradle.kts build.gradle.kts
-COPY settings.gradle.kts settings.gradle.kts
-RUN gradle bootJar --no-daemon
+COPY . .
+RUN gradle bootJar --no-daemon && rm -rf /root/.kotlin
 
 FROM amazoncorretto:21
 WORKDIR /app
