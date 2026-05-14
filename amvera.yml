@@ -1,0 +1,13 @@
+meta:
+  environment: jvm
+  toolchain:
+    name: gradle
+    version: 21
+
+build:
+  command: ./gradlew bootJar
+  args: -Dserver.port=80
+
+run:
+  jarName: build/libs/*.jar
+  containerPort: 8080

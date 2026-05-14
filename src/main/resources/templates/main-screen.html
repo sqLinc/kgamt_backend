@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Веб интерфейс для администраторов столовой КГАМТ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Меню по дням</h2>
+    <div>
+      <a href="/create/dish" class="btn btn-primary me-2">
+        Создать блюдо
+      </a>
+      <a href="/create/menu" class="btn btn-success">
+        Создать меню
+      </a>
+      <a href="/requests/list" class="btn btn-warning btn-sm">
+        Заявки по питанию
+      </a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-4" th:each="menu : ${menuItems}">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <strong th:text="${menu.weekDay}"></strong>
+          <span class="float-end" th:text="${menu.date}"></span>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"
+              th:each="dish : ${menu.items}">
+            <span th:text="${dish.category + ': ' + dish.name}"></span>
+            <span class="float-end text-muted"
+                  th:text="${dish.price} + ' ₽'"></span>
+          </li>
+        </ul>
+        <div class="card-footer bg-white border-top">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Итого за день:</span>
+            <span class="fw-bold fs-5" th:text="${menu.cost} + ' ₽'">0 ₽</span>
+          </div>
+        </div>
+        <div class="card-footer text-center">
+          <a th:href="@{/edit/menu/{date}(date=${menu.date})}"
+             class="btn btn-warning btn-sm">
+            Изменить день
+          </a>
+          <form th:action="@{/delete/day}" method="post" style="display:inline;">
+            <input type="hidden" name="date"
+                   th:value="${menu.date}" />
+            <input type="hidden" name="_method" value="delete"/>
+            <button type="submit"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Удалить меню этого дня?');">
+              Удалить день
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h5>Удалить неделю</h5>
+  <form th:action="@{/delete/week}" method="post" class="row g-3">
+    <div class="col-auto">
+      <input type="hidden" name="_method" value="delete"/>
+      <button type="submit"
+              class="btn btn-warning"
+              onclick="return confirm('Удалить всю неделю?');">
+        Удалить неделю
+      </button>
+    </div>
+  </form>
+  <hr class="my-4"/>
+</div>
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Все блюда</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-4 mb-4" th:each="entry : ${dishCat}">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <strong th:text="${entry.key.displayName}"></strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li th:each="dish : ${entry.value}" class="list-group-item">
+            <a th:href="@{/dish/{id}(id=${dish.id})}" class="text-decoration-none">
+              <span th:text="${dish.name}"></span>
+              <span class="float-end text-muted" th:text="${dish.price} + ' ₽'"></span>
+            </a>
+          </li>
+        </ul>
+      </div>
+  </div>
+</div>
+</div>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Дополнительно</h3>
+  </div>
+  <button class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#userModal">
+    Пользователи
+  </button>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+
+      <div class="modal-header">
+        <h5 class="modal-title">Пользователи</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+
+      <div class="modal-body text-center">
+
+        <a href="/create/user" class="btn btn-success w-100 mb-2">
+          Добавить пользователя
+        </a>
+
+        <a href="/users" class="btn btn-outline-primary w-100">
+          Список пользователей
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+

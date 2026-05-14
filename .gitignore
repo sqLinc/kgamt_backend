@@ -1,0 +1,18 @@
+# IDEA / Android Studio
+/.idea/
+/*.iml
+/.gradle/
+/build/
+/out/
+
+# Секреты
+/application.yml
+.env
+
+
+# Логи
+*.log
+
+# OS файлы
+.DS_Store
+Thumbs.db

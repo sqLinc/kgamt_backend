@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Создание блюда</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark d-flex align-items-center justify-content-center">
+<div class="card shadow-lg p-4" style="width: 380px; border-radius: 15px;">
+    <h3 class="text-center mb-4">Полная информация о блюде</h3>
+    <img th:if="${dish.imageUrl != null}"
+         th:src="${dish.imageUrl}"
+         width="200"
+         class="rounded" alt="">
+    <div class="mb-3">
+        <label class="form-label">Название блюда</label>
+        <h2 th:text="${dish.name}"></h2>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Цена</label>
+        <h2 th:text="${dish.price} + ' ₽'"></h2>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Количество в порции</label>
+        <h2 th:text="${dish.quantity} + 'гр.'"></h2>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Калорийность/100гр</label>
+        <h2 th:text="${dish.kcal} + 'ккал.'"></h2>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Описание</label>
+        <h2 th:text="${dish.desc}"></h2>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Категория</label>
+        <h2 th:text="${dish.category.displayName}"></h2>
+    </div>
+    <a th:href="@{/edit/dish/{id}(id=${dish.id})}"
+       class="btn btn-warning btn-sm">
+        Изменить блюдо
+    </a>
+    <form th:action="@{/delete/dish/{id}(id=${dish.id})}" method="post" style="display:inline;">
+        <input type="hidden" name="id"
+               th:value="${dish.id}"/>
+        <input type="hidden" name="_method" value="delete"/>
+        <button type="submit"
+                class="btn btn-danger btn-sm w-100"
+                onclick="return confirm('Удалить блюдо?');">
+            Удалить блюдо
+        </button>
+    </form>
+    <a href="/main-screen" class="btn btn-primary w-100">Назад</a>
+</div>
+</body>
+</html>

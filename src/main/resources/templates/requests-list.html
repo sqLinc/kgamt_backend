@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Заявки</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-4">
+
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>📅 Заказы на сегодня</h3>
+    <a href="/main-screen" class="btn btn-primary">Назад</a>
+  </div>
+
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-body p-0">
+
+      <table class="table table-striped text-center mb-0">
+        <thead class="table-dark">
+        <tr>
+          <th>Группа</th>
+          <th>С супом</th>
+          <th>Без супа</th>
+          <th>Стоимость</th>
+          <th>Статус</th>
+          <th>Действие</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr th:if="${#lists.isEmpty(todayRequests)}">
+          <td colspan="6" class="text-muted py-3">Нет заказов</td>
+        </tr>
+
+        <tr th:each="req : ${todayRequests}">
+          <td th:text="${req.group}"></td>
+          <td th:text="${req.withSoup}"></td>
+          <td th:text="${req.withoutSoup}"></td>
+          <td th:text="${req.totalCost} + ' ₽'"></td>>
+
+          <td>
+            <span th:if="${req.isConfirmed}" class="badge bg-success">Подтверждён</span>
+            <span th:unless="${req.isConfirmed}" class="badge bg-warning text-dark">Ожидание</span>
+          </td>
+
+          <td>
+            <form th:if="${!req.isConfirmed}"
+                  th:action="@{'/requests/' + ${req.id} + '/confirm'}"
+                  method="post">
+              <button class="btn btn-success btn-sm">Подвердить заказ</button>
+            </form>
+          </td>
+        </tr>
+
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+
+  <h3 class="mb-3">📚 История заказов</h3>
+
+  <div class="accordion" id="months">
+
+
+    <div th:each="month, mStat : ${history}" class="accordion-item">
+
+
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                th:attr="data-bs-target='#m' + ${mStat.index}">
+          📅
+          <span th:text="${#temporals.format(month.month, 'yyyy-MM')}"></span>
+        </button>
+      </h2>
+
+      <div class="accordion-collapse collapse"
+           th:id="'m' + ${mStat.index}"
+           data-bs-parent="#months">
+
+        <div class="accordion-body">
+
+          <div class="accordion">
+
+
+            <div th:each="group, gStat : ${month.groups}" class="accordion-item">
+
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        th:attr="data-bs-target='#g' + ${mStat.index} + '-' + ${gStat.index}">
+                  👥 <span th:text="${group.groupName}"></span>
+                </button>
+              </h2>
+
+              <div class="accordion-collapse collapse"
+                   th:id="'g' + ${mStat.index} + '-' + ${gStat.index}">
+
+                <div class="accordion-body">
+
+                  <table class="table table-sm table-bordered text-center align-middle">
+
+                    <thead class="table-light">
+                    <tr>
+                      <th>Дата</th>
+                      <th>Суп</th>
+                      <th>Без супа</th>
+                      <th>Стоимость</th>
+                      <th>Оплата</th>
+                      <th>Действие</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="r : ${group.requests}">
+                      <td th:text="${r.date}"></td>
+                      <td th:text="${r.withSoup}"></td>
+                      <td th:text="${r.withoutSoup}"></td>
+                      <td th:text="${r.totalCost} + ' ₽'"></td>
+
+                      <td>
+                        <span th:if="${r.isPaid}" class="badge bg-success">Оплачено</span>
+                        <span th:unless="${r.isPaid}" class="badge bg-danger">Нет</span>
+                      </td>
+
+                      <td class="d-flex gap-2 justify-content-center">
+
+                        <form th:if="${!r.isPaid}"
+                              th:action="@{'/requests/' + ${r.id} + '/paid'}"
+                              method="post"
+                              onsubmit="return confirm('Изменить статус оплаты на Оплачено?')">
+
+                        <button class="btn btn-sm btn-primary">Оплатить</button>
+                        </form>
+                        <form th:action="@{'/requests/' + ${r.id} + '/delete'}"
+                              method="post"
+                              onsubmit="return confirm('Удалить заказ?')">
+                          <button class="btn btn-sm btn-danger">Удалить заказ</button>
+                        </form>
+
+                      </td>
+                    </tr>
+
+                    </tbody>
+
+                  </table>
+
+
+                  <div class="d-flex justify-content-between align-items-center mt-3">
+
+                    <div class="fw-bold">
+                      Итого: <span th:text="${group.totalCost}"></span> ₽
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+
+                      <form th:action="@{/requests/delete/group}"
+                            method="post"
+                            onsubmit="return confirm('Удалить историю?')">
+
+                        <input type="hidden" name="group" th:value="${group.groupName}">
+                        <input type="hidden" name="monthStart"
+                               th:value="${#temporals.format(month.month, 'yyyy-MM-01')}">
+                        <input type="hidden" name="monthEnd"
+                               th:value="${#temporals.format(month.month.withDayOfMonth(month.month.lengthOfMonth()), 'yyyy-MM-dd')}">
+
+                        <button class="btn btn-sm btn-outline-danger">
+                          🗑 Удалить
+                        </button>
+                      </form>
+
+                      <!-- EXPORT -->
+                      <a th:href="@{/requests/export(
+                                    group=${group.groupName},
+                                    monthStart=${#temporals.format(month.month, 'yyyy-MM-01')},
+                                    monthEnd=${#temporals.format(month.month.withDayOfMonth(month.month.lengthOfMonth()), 'yyyy-MM-dd')}
+                                  )}"
+                         class="btn btn-sm btn-success">
+                        📥 Excel
+                      </a>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
