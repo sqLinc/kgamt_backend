@@ -19,6 +19,8 @@ class JwtFilter(
     ) {
         val header = request.getHeader("Authorization")
 
+        println("HEADER = $header")
+
         if (header != null && header.startsWith("Bearer ")) {
             val token = header.substring(7)
 
@@ -32,6 +34,9 @@ class JwtFilter(
                 )
 
                 SecurityContextHolder.getContext().authentication = auth
+
+                println("AUTH SUCCESS")
+
             }
         }
 

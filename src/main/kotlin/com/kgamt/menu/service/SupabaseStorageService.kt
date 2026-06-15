@@ -8,8 +8,12 @@ import java.util.*
 
 @Service
 class SupabaseStorageService {
-    private val url = System.getenv("SUPABASE_URL")
-    private val key = System.getenv("SUPABASE_KEY")
+    //url = https://jbmvggoaqygiogzdtefy.supabase.co
+    //key = sb_secret_US7K68UBpgdznsN0ckrd_w_KUXHlY_f
+private val url = System.getenv("SUPABASE_URL")
+private val key = System.getenv("SUPABASE_KEY")
+//    private val key = "sb_secret_US7K68UBpgdznsN0ckrd_w_KUXHlY_f"
+//    private val url = "https://jbmvggoaqygiogzdtefy.supabase.co"
     private val bucket = "dish-images"
 
     private val webClient = WebClient.builder()

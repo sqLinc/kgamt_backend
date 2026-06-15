@@ -3,6 +3,7 @@ package com.kgamt.menu.controller
 import com.kgamt.menu.entity.Dish
 import com.kgamt.menu.entity.DishCategory
 import com.kgamt.menu.repository.DishRepository
+import com.kgamt.menu.repository.MenuDayRepository
 import com.kgamt.menu.repository.MenuItemRepository
 import com.kgamt.menu.service.SupabaseStorageService
 import org.springframework.stereotype.Controller
@@ -19,6 +20,7 @@ class DishWebController(
     private val dishRepository: DishRepository,
     private val supabaseStorageService: SupabaseStorageService,
     private val menuItemRepository: MenuItemRepository,
+    private val menuDayRepository: MenuDayRepository
 ) {
 
     @GetMapping("/create/dish")
@@ -63,13 +65,36 @@ class DishWebController(
     fun deleteDish(
         @PathVariable id: Long
     ): String {
+
         val items = menuItemRepository.findByDishId(id)
+
+        // Запоминаем дни меню, где использовалось блюдо
+        val affectedMenuDays = items.map { it.menuDay }.distinct()
+
         val dish = dishRepository.findById(id).orElseThrow()
-        dish.let {
-            supabaseStorageService.deleteFile(dish.imageUrl!!)
+
+        dish.imageUrl?.let {
+            supabaseStorageService.deleteFile(it)
         }
+
         menuItemRepository.deleteAll(items)
         dishRepository.deleteById(id)
+
+        // Проверяем дни меню
+        affectedMenuDays.forEach { menuDay ->
+
+            val remainingItems = menuItemRepository.findAllByMenuDay(menuDay)
+
+            if (remainingItems.isEmpty()) {
+                menuDayRepository.delete(menuDay)
+            } else {
+                val newCost = remainingItems.sumOf { it.dish.price }
+                menuDayRepository.save(
+                    menuDay.copy(cost = newCost)
+                )
+            }
+        }
+
         return "redirect:/main-screen"
     }
 
@@ -123,7 +148,25 @@ class DishWebController(
                 imageUrl = imageUrl
             )
         )
+
+        recalculateMenuCosts()
         return "redirect:/main-screen"
+    }
+
+    private fun recalculateMenuCosts() {
+
+        val menuDays = menuDayRepository.findAll()
+
+        menuDays.forEach { menuDay ->
+
+            val items = menuItemRepository.findAllByMenuDay(menuDay)
+
+            val totalCost = items.sumOf { it.dish.price }
+
+            menuDayRepository.save(
+                menuDay.copy(cost = totalCost)
+            )
+        }
     }
 
     @GetMapping("/dish/{id}")

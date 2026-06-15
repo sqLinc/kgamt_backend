@@ -21,7 +21,6 @@ class WebConfig {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
@@ -32,6 +31,7 @@ class WebConfig {
                     .requestMatchers("/api/menu").permitAll()
                     .requestMatchers("/api/**").permitAll()
                     .anyRequest().authenticated()
+
             }
             .formLogin { form ->
                 form
@@ -42,7 +42,6 @@ class WebConfig {
             .logout { logout ->
                 logout.logoutSuccessUrl("/login")
             }
-
         return http.build()
     }
 
@@ -53,23 +52,18 @@ class WebConfig {
 
     @Bean
     fun userDetailService(passwordEncoder: PasswordEncoder): UserDetailsService {
-
         val admin = User.builder()
             .username("admin")
             .password(passwordEncoder.encode("admin"))
             .roles("ADMIN")
             .build()
-
         val leader = User.builder()
             .username("leader")
             .password(passwordEncoder.encode("leader"))
             .roles("LEADER")
             .build()
-
         return InMemoryUserDetailsManager(admin, leader)
-
     }
-
     @Bean
     fun hiddenHttpMethodFilter(): HiddenHttpMethodFilter {
         return HiddenHttpMethodFilter()

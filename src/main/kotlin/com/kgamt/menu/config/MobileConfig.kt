@@ -25,7 +25,7 @@ class MobileConfig {
     ): SecurityFilterChain {
 
         http
-            .securityMatcher("/leader/**", "/api/**")
+            .securityMatcher("/leader/**", "/api/**", "/test/**")
 
             .csrf { it.disable() }
             .formLogin { it.disable() }
@@ -38,11 +38,12 @@ class MobileConfig {
             .authorizeHttpRequests {
                 it
                     .requestMatchers("/leader/login").permitAll()
-                    .requestMatchers("/leader/send_request").permitAll()
-                    .requestMatchers("/leader/get_today_request").permitAll()
-                    .requestMatchers("/leader/request/update").permitAll()
-                    .requestMatchers("/leader/request/all").permitAll()
+                    .requestMatchers("/leader/send_request").authenticated()
+                    .requestMatchers("/leader/get_today_request").authenticated()
+                    .requestMatchers("/leader/request/update").authenticated()
+                    .requestMatchers("/leader/request/all").authenticated()
                     .requestMatchers("/api/**").permitAll()
+                    .requestMatchers("/test/**").authenticated()
             }
 
 
